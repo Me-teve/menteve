@@ -1,0 +1,89 @@
+// Search functionality
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const products = document.querySelectorAll('.product');
+
+searchBtn.addEventListener('click', () => {
+    const query = searchInput.value.toLowerCase();
+    products.forEach(product => {
+        const name = product.querySelector('h3').textContent.toLowerCase();
+        if (name.includes(query)) {
+            product.style.display = 'block';
+        } else {
+            product.style.display = 'none';
+        }
+    });
+});
+
+// Product details modal
+const productModal = document.getElementById('product-modal');
+const productClose = document.getElementById('product-close');
+const productImage = document.getElementById('product-image');
+const productName = document.getElementById('product-name');
+const productDescription = document.getElementById('product-description');
+const productPrice = document.getElementById('product-price');
+const addToCartModal = document.getElementById('add-to-cart-modal');
+
+document.querySelectorAll('.view-details').forEach(btn => {
+    btn.addEventListener('click', () => {
+        productImage.src = btn.dataset.img;
+        productName.textContent = btn.dataset.name;
+        productDescription.textContent = btn.dataset.desc;
+        productPrice.textContent = `$${btn.dataset.price}`;
+        addToCartModal.dataset.name = btn.dataset.name;
+        addToCartModal.dataset.price = btn.dataset.price;
+        productModal.style.display = 'block';
+    });
+});
+
+addToCartModal.addEventListener('click', () => {
+    const name = addToCartModal.dataset.name;
+    const price = parseFloat(addToCartModal.dataset.price);
+    const existing = cart.find(item => item.name === name);
+    if (existing) {
+        existing.quantity++;
+    } else {
+        cart.push({ name, price, quantity: 1 });
+    }
+    updateCart();
+    productModal.style.display = 'none';
+});
+
+productClose.addEventListener('click', () => {
+    productModal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === productModal) {
+        productModal.style.display = 'none';
+    }
+});
+
+// Enhanced cart with quantity controls
+function updateCart() {
+    cartItems.innerHTML = '';
+    let total = 0;
+    cart.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.innerHTML = `
+            <p>${item.name} - $${item.price} x 
+            <button onclick="changeQuantity(${index}, -1)">-</button>
+            ${item.quantity}
+            <button onclick="changeQuantity(${index}, 1)">+</button>
+            <button onclick="removeFromCart(${index})">Remove</button></p>
+        `;
+        cartItems.appendChild(itemDiv);
+        total += item.price * item.quantity;
+    });
+    cartTotal.textContent = total.toFixed(2);
+    cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+window.changeQuantity = (index, delta) => {
+    cart[index].quantity += delta;
+    if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+    }
+    updateCart();
+};
