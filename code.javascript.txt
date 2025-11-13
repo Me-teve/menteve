@@ -1,0 +1,73 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const cartBtn = document.getElementById('cart-btn');
+    const cartModal = document.getElementById('cart-modal');
+    const closeBtn = document.querySelector('.close');
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    const cartCount = document.getElementById('cart-count');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Update cart display
+    function updateCart() {
+        cartItems.innerHTML = '';
+        let total = 0;
+        cart.forEach((item, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.innerHTML = `
+                <p>${item.name} - $${item.price} x ${item.quantity}
+                <button onclick="removeFromCart(${index})">Remove</button></p>
+            `;
+            cartItems.appendChild(itemDiv);
+            total += item.price * item.quantity;
+        });
+        cartTotal.textContent = total.toFixed(2);
+        cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Add to cart
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const name = btn.dataset.name;
+            const price = parseFloat(btn.dataset.price);
+            const existing = cart.find(item => item.name === name);
+            if (existing) {
+                existing.quantity++;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
+            updateCart();
+        });
+    });
+
+    // Remove from cart
+    window.removeFromCart = (index) => {
+        cart.splice(index, 1);
+        updateCart();
+    };
+
+    // Modal controls
+    cartBtn.addEventListener('click', () => {
+        cartModal.style.display = 'block';
+        updateCart();
+    });
+
+    closeBtn.addEventListener('click', () => {
+        cartModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === cartModal) {
+            cartModal.style.display = 'none';
+        }
+    });
+
+    // Checkout (placeholder)
+    checkoutBtn.addEventListener('click', () => {
+        alert('Checkout functionality would integrate with a payment gateway here.');
+    });
+
+    updateCart(); // Load on page load
+});
